@@ -7,15 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F2A27AE24DAD10B0001B5BE /* MyPepsiObjectDetector 1.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 1F2A27AD24DAD10B0001B5BE /* MyPepsiObjectDetector 1.mlmodel */; };
 		1F3AA90E24AA2308009BA957 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F3AA90D24AA2308009BA957 /* AppDelegate.swift */; };
 		1F3AA91024AA2308009BA957 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F3AA90F24AA2308009BA957 /* SceneDelegate.swift */; };
 		1F3AA91224AA2308009BA957 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F3AA91124AA2308009BA957 /* ViewController.swift */; };
 		1F3AA91524AA2308009BA957 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1F3AA91324AA2308009BA957 /* Main.storyboard */; };
 		1F3AA91724AA230B009BA957 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F3AA91624AA230B009BA957 /* Assets.xcassets */; };
 		1F3AA91A24AA230B009BA957 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1F3AA91824AA230B009BA957 /* LaunchScreen.storyboard */; };
+		1F3AA92324AA23CF009BA957 /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F3AA92224AA23CF009BA957 /* UIView+Extension.swift */; };
+		1F3AA92524AA2525009BA957 /* UIColor+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F3AA92424AA2525009BA957 /* UIColor+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1F2A27AD24DAD10B0001B5BE /* MyPepsiObjectDetector 1.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = "MyPepsiObjectDetector 1.mlmodel"; sourceTree = "<group>"; };
 		1F3AA90A24AA2308009BA957 /* PepsiProductRecognizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PepsiProductRecognizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F3AA90D24AA2308009BA957 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1F3AA90F24AA2308009BA957 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -24,6 +28,8 @@
 		1F3AA91624AA230B009BA957 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1F3AA91924AA230B009BA957 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1F3AA91B24AA230B009BA957 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1F3AA92224AA23CF009BA957 /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
+		1F3AA92424AA2525009BA957 /* UIColor+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,11 +66,22 @@
 				1F3AA90F24AA2308009BA957 /* SceneDelegate.swift */,
 				1F3AA91124AA2308009BA957 /* ViewController.swift */,
 				1F3AA91324AA2308009BA957 /* Main.storyboard */,
+				1F2A27AD24DAD10B0001B5BE /* MyPepsiObjectDetector 1.mlmodel */,
 				1F3AA91624AA230B009BA957 /* Assets.xcassets */,
+				1F3AA92124AA23BA009BA957 /* Extensions */,
 				1F3AA91824AA230B009BA957 /* LaunchScreen.storyboard */,
 				1F3AA91B24AA230B009BA957 /* Info.plist */,
 			);
 			path = PepsiProductRecognizer;
+			sourceTree = "<group>";
+		};
+		1F3AA92124AA23BA009BA957 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				1F3AA92224AA23CF009BA957 /* UIView+Extension.swift */,
+				1F3AA92424AA2525009BA957 /* UIColor+Extension.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -140,7 +157,10 @@
 			files = (
 				1F3AA91224AA2308009BA957 /* ViewController.swift in Sources */,
 				1F3AA90E24AA2308009BA957 /* AppDelegate.swift in Sources */,
+				1F2A27AE24DAD10B0001B5BE /* MyPepsiObjectDetector 1.mlmodel in Sources */,
+				1F3AA92324AA23CF009BA957 /* UIView+Extension.swift in Sources */,
 				1F3AA91024AA2308009BA957 /* SceneDelegate.swift in Sources */,
+				1F3AA92524AA2525009BA957 /* UIColor+Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
