@@ -8,6 +8,8 @@
 
 import UIKit
 import CoreML
+import Vision
+import ImageIO
 
 class ViewController: UIViewController, UINavigationControllerDelegate {
     
@@ -30,24 +32,26 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         return label
     }()
     
-    let cameraButton: UIButton = {
-        let btn = UIButton(type: .system)
-        btn.setTitle("Camera", for: .normal)
-        btn.addTarget(self, action: #selector(camera), for: .touchUpInside)
-        return btn
-    }()
-    
     let photoLibraryButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.setTitle("Photo Library", for: .normal)
         btn.addTarget(self, action: #selector(photoLib), for: .touchUpInside)
         return btn
     }()
-    
-    let buttonsContainerView: UIView = {
-        let view = UIView()
-        return view
-    }()
+	
+	lazy var detection:VNCoreMLRequest = {
+		do {
+			let model = try VNCoreMLModel(for: NewPepsiDetector_1().model)
+			
+			let request = VNCoreMLRequest(model: model, completionHandler: { [weak self] request, error in
+				self?.processDetections(request: request, error: error)
+			})
+			request.imageCropAndScaleOption = .scaleFit
+			return request
+		} catch {
+			fatalError("Failed to load Vision ML model: \(error)")
+		}
+	}()
     
     @objc func camera() {
         print("open camera!")
@@ -84,7 +88,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     }
     
     // MARK: Properties
-    var model: MyPepsiObjectDetector_1!
     static let width: CGFloat = 416
     static let height: CGFloat = 416
     
@@ -98,44 +101,27 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
-        model = MyPepsiObjectDetector_1()
     }
     
     
     func setupUI() {
-        self.view.backgroundColor = UIColor.rgb(red: 253, green: 245, blue: 230)
+        view.backgroundColor = UIColor.rgb(red: 253, green: 245, blue: 230)
         //** imageToAnalize
-        self.view.addSubview(imageToAnalize)
+        view.addSubview(imageToAnalize)
         imageToAnalize.anchor(top: nil, left: nil, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: ViewController.width, height: ViewController.height)
         imageToAnalize.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         imageToAnalize.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         imageToAnalize.addShadow()
         
         //** classifier label
-        self.view.addSubview(classifierLabel)
+        view.addSubview(classifierLabel)
         classifierLabel.anchor(top: nil, left: nil, bottom: imageToAnalize.topAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 20, paddingRight: 0, width: 0, height: 0)
         classifierLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         
-        //** buttonsContainer
-        self.view.addSubview(buttonsContainerView)
-        buttonsContainerView.backgroundColor = .white
-        buttonsContainerView.layer.cornerRadius = 5.0
-        buttonsContainerView.layer.borderWidth = 1.0
-        buttonsContainerView.layer.borderColor = UIColor.rgb(red: 245, green: 245, blue: 220).cgColor
-        buttonsContainerView.addShadow()
-        
-        buttonsContainerView.anchor(top: imageToAnalize.bottomAnchor, left: self.view.leftAnchor, bottom: nil, right:self.view.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 100)
-        
-        //** camera button
-        buttonsContainerView.addc`fGATFACAGFAGZcv`cfazresw4sreaeaewawSubview(cameraButton)w#wERxgzfgxfxgfxgxhdcfvvcchn gvcc
-        cameraButton.anchor(top: buttonsContainerView.topAnchor, left: buttonsContainerView.leftAnchor, bottom: buttonsContainerView.bottomAnchor, right: nil, paddingTop: 20, paddingLeft: 10, paddingBottom: 20, paddingRight: 0, width: 160, height: 60)
-        cameraButton.backgroundColor = .black
-        cameraButton.layer.cornerRadius = 5.0
-        cameraButton.addShadow()
+		view.addSubview(photoLibraryButton)
+		photoLibraryButton.anchor(top: imageToAnalize.bottomAnchor, left: self.view.leftAnchor, bottom: nil, right:self.view.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 60)
         
         //** photoLibraryButton
-        buttonsContainerView.addSubview(photoLibraryButton)
-        photoLibraryButton.anchor(top: buttonsContainerView.topAnchor, left: nil, bottom: buttonsContainerView.bottomAnchor, right: buttonsContainerView.rightAnchor, paddingTop: 20, paddingLeft: 0, paddingBottom: 20, paddingRight: 10, width: 160, height: 60)
         photoLibraryButton.layer.borderColor = UIColor.black.cgColor
         photoLibraryButton.layer.borderWidth = 3.0
         photoLibraryButton.layer.cornerRadius = 5.0
@@ -149,50 +135,74 @@ extension ViewController: UIImagePickerControllerDelegate {
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         print("image picker controller did cancel!")
         dismiss(animated: true, completion: nil)
+		
     }
     
-    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        picker.dismiss(animated: true)
-        self.classifierLabel.text = "Analyzing your image!"
-        guard let selectedImage = info[UIImagePickerController.InfoKey(rawValue: "UIImagePickerControllerOriginalImage")] as? UIImage else { return }
-        scaleImageForMLModel(originalImage: selectedImage)
-    }
+	public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+		picker.dismiss(animated: true)
+		
+		guard let image = info[.originalImage] as? UIImage else {
+			return
+		}
+		
+		self.imageToAnalize.image = image
+		updateDetections(image: image)
+	}
     
-    fileprivate func scaleImageForMLModel(originalImage: UIImage) {
-        
-        UIGraphicsBeginImageContextWithOptions(CGSize(width: ViewController.width, height: ViewController.height), true, 2.0)
-        originalImage.draw(in: CGRect(x: 0, y: 0, width: ViewController.width, height: ViewController.height))
-        let updatedImage = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        
-        let attrs = [kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue, kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue] as CFDictionary
-        var pixelBuffer : CVPixelBuffer?
-        let status = CVPixelBufferCreate(kCFAllocatorDefault, Int(updatedImage.size.width), Int(updatedImage.size.height), kCVPixelFormatType_32ARGB, attrs, &pixelBuffer)
-        if status == kCVReturnSuccess {
+}
 
-            CVPixelBufferLockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: 0))
-            let pixelData = CVPixelBufferGetBaseAddress(pixelBuffer!)
-            
-            let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-            let context = CGContext(data: pixelData, width: Int(updatedImage.size.width), height: Int(updatedImage.size.height), bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(pixelBuffer!), space: rgbColorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue) //3
-            
-            context?.translateBy(x: 0, y: updatedImage.size.height)
-            context?.scaleBy(x: 1.0, y: -1.0)
-            
-            UIGraphicsPushContext(context!)
-            updatedImage.draw(in: CGRect(x: 0, y: 0, width: updatedImage.size.width, height: updatedImage.size.height))
-            UIGraphicsPopContext()
-            CVPixelBufferUnlockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: 0))
-            
-            imageToAnalize.image = updatedImage
-            makePrediction(pixelBuffer: pixelBuffer)
-        } else { return }
-    }
-
-    fileprivate func makePrediction(pixelBuffer: CVPixelBuffer?) {
-        guard let pixelImage = pixelBuffer else { return }
-        guard let prediction = try? model.prediction(image: pixelImage, iouThreshold: 0.3, confidenceThreshold: 0.2) else { return }
-        print(prediction)
-    }
-    
+extension ViewController {
+	
+	private func updateDetections(image: UIImage) {
+		let orientation = CGImagePropertyOrientation(rawValue: UInt32(image.imageOrientation.rawValue))
+		guard let convertedImage = CIImage(image: image) else { fatalError("Unable to create \(CIImage.self) from \(image).")}
+		
+		DispatchQueue.global(qos: .userInitiated).async {
+			let handler = VNImageRequestHandler(ciImage: convertedImage, orientation: orientation!)
+			do {
+				try handler.perform([self.detection])
+			} catch {
+				print("Failed to detect!:  ", error.localizedDescription)
+			}
+		}
+	}
+	
+	private func processDetections(request: VNRequest, error: Error?) {
+		DispatchQueue.main.async {
+			guard let results = request.results else {
+				print("Unable to detect!: ", error?.localizedDescription ?? "")
+				return
+			}
+			let detections = results as! [VNRecognizedObjectObservation]
+			self.drawDetections(detections: detections)
+		}
+	}
+	
+	func drawDetections(detections: [VNRecognizedObjectObservation]) {
+		guard let image = self.imageToAnalize.image else { return }
+		let imageSize = image.size
+		let scale: CGFloat = 0
+		UIGraphicsBeginImageContextWithOptions(imageSize, false, scale)
+		image.draw(at: CGPoint.zero)
+		for detection in detections {
+			print(detection.labels.map({"\($0.identifier) confidence: \($0.confidence)"}).joined(separator: "\n"))
+			print("------------")
+			
+			
+			let boundingBox = detection.boundingBox
+			let rectangle = CGRect(x: boundingBox.minX*image.size.width, y: (1-boundingBox.minY-boundingBox.height)*image.size.height, width: boundingBox.width*image.size.width, height: boundingBox.height*image.size.height)
+			UIColor(red: 0, green: 1, blue: 0, alpha: 0.4).setFill()
+			UIRectFillUsingBlendMode(rectangle, CGBlendMode.normal)
+			
+		}
+		
+		let newImage = UIGraphicsGetImageFromCurrentImageContext()
+		UIGraphicsEndImageContext()
+		self.imageToAnalize.image = newImage
+		
+	}
+	
+	@objc func showWikiPage(sender: UIButton) {
+		print("\n--> title: ", sender.title(for: .normal) ?? "now working bruh!")
+	}
 }
