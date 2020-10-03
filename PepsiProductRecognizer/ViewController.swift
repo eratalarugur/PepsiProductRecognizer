@@ -18,23 +18,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     var imageToAnalize: UIImageView = {
         let img = UIImageView()
         img.contentMode = .scaleAspectFit
-        img.backgroundColor = .clear
+		img.backgroundColor = .yellow
+		img.isUserInteractionEnabled = true
+		img.clipsToBounds = true
         return img
-    }()
-    
-    let classifierLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 18.0, weight: .medium)
-        label.numberOfLines = 0
-        label.lineBreakMode = .byWordWrapping
-        label.sizeToFit()
-        label.text = "Super Potatoo"
-        return label
     }()
     
     let photoLibraryButton: UIButton = {
         let btn = UIButton(type: .system)
-        btn.setTitle("Photo Library", for: .normal)
+        btn.setTitle("Select Photo", for: .normal)
         btn.addTarget(self, action: #selector(photoLib), for: .touchUpInside)
         return btn
     }()
@@ -113,11 +105,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         imageToAnalize.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         imageToAnalize.addShadow()
         
-        //** classifier label
-        view.addSubview(classifierLabel)
-        classifierLabel.anchor(top: nil, left: nil, bottom: imageToAnalize.topAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 20, paddingRight: 0, width: 0, height: 0)
-        classifierLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        
 		view.addSubview(photoLibraryButton)
 		photoLibraryButton.anchor(top: imageToAnalize.bottomAnchor, left: self.view.leftAnchor, bottom: nil, right:self.view.rightAnchor, paddingTop: 20, paddingLeft: 20, paddingBottom: 0, paddingRight: 20, width: 0, height: 60)
         
@@ -184,25 +171,30 @@ extension ViewController {
 		let scale: CGFloat = 0
 		UIGraphicsBeginImageContextWithOptions(imageSize, false, scale)
 		image.draw(at: CGPoint.zero)
+		var btnArray = [UIButton]()
 		for detection in detections {
 			print(detection.labels.map({"\($0.identifier) confidence: \($0.confidence)"}).joined(separator: "\n"))
 			print("------------")
-			
 			
 			let boundingBox = detection.boundingBox
 			let rectangle = CGRect(x: boundingBox.minX*image.size.width, y: (1-boundingBox.minY-boundingBox.height)*image.size.height, width: boundingBox.width*image.size.width, height: boundingBox.height*image.size.height)
 			UIColor(red: 0, green: 1, blue: 0, alpha: 0.4).setFill()
 			UIRectFillUsingBlendMode(rectangle, CGBlendMode.normal)
 			
+//			let wikiButton = UIButton(type: .system)
+//			wikiButton.backgroundColor = .red
+//			wikiButton.center = CGPoint(x: boundingBox.minX*image.size.width, y: (1-boundingBox.minY-boundingBox.height)*image.size.height)
+//			wikiButton.frame.size = CGSize(width: boundingBox.width*image.size.width, height: boundingBox.height*image.size.height)
+//			wikiButton.addTarget(self, action: #selector(showWikiPage), for: .touchUpInside)
+//			btnArray.append(wikiButton)
 		}
 		
 		let newImage = UIGraphicsGetImageFromCurrentImageContext()
 		UIGraphicsEndImageContext()
 		self.imageToAnalize.image = newImage
-		
 	}
 	
-	@objc func showWikiPage(sender: UIButton) {
-		print("\n--> title: ", sender.title(for: .normal) ?? "now working bruh!")
+	@objc func showWikiPage() {
+		print("\nshow wiki\n")
 	}
 }
